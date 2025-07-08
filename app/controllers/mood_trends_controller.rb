@@ -1,12 +1,11 @@
-# frozen_string_literal: true
+# app/controllers/mood_trends_controller.rb
 class MoodTrendsController < ApplicationController
-  def index
-    render json: {
-      mood_data: [
-        { date: '2025-06-01', mood: 'happy', count: 2 },
-        { date: '2025-06-02', mood: 'sad', count: 1 },
-        { date: '2025-06-03', mood: 'anxious', count: 3 }
-      ]
-    }
+  def index_data(user)
+    user.moments
+        .joins(:moods)
+        .select("DATE(moments.created_at) as date, COUNT(moods.id) as score")
+        .group("DATE(moments.created_at)")
+        .order("date")
+        .map { |record| { date: record.date, score: record.score.to_f.round(2) } }
   end
 end
